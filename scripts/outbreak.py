@@ -5,7 +5,6 @@ import csv
 import matplotlib.pyplot as plt
 
 
-# calibration_mapa_okrsky_v2
 def pixel_to_gps_mapa_okrsky(x, y):
     # calibration points
     # x-axis: 441 = 18.70737, 1310 = 18.78205
@@ -36,15 +35,23 @@ def gps_to_pixel_mapa_okrsky(latt, longit):
     zero_yGPS = 49.2449 - 381 * dyGPS / dy
 
     return [(longit - zero_xGPS) / dxGPS * dx, (latt - zero_yGPS) / dyGPS * dy]
+        
 
-class bus_stop:
-    def __init__(self, id, name, latt, longit):
-        self.id = int(id)
-        self.name = str(name)
-        self.latt = float(latt)
-        self.longit = float(longit)
-        
-        
+def draw_map_with_stops(list_of_stops):
+
+    try:
+        img  = Image.open("empty-mapa.png")
+    except IOError:
+        pass
+
+    draw = ImageDraw.Draw(img)
+
+    for stop in list_of_stops:
+        stop.label_to_map(draw)
+
+    img.show()
+
+    
 class Stop:
     def __init__(self, id, name, latt, longit, x, y):
         self.id = int(id)
@@ -58,6 +65,8 @@ class Stop:
         font = ImageFont.truetype("arial.ttf", 15)
         r = 3
         draw.ellipse((self.x-r, self.y-r, self.x+r, self.y+r), fill=(0,0,0,0))
+
+        # draw.text((x, y),"Text",(r,g,b))
         draw.text((self.x + r, self.y - r), self.name, font = font, fill=(0,0,0,255))
 
     def print(self):
@@ -261,16 +270,5 @@ class Map:
 
 
 
-def draw_map_with_stops(list_of_stops):
 
-    try:
-        img  = Image.open("empty-mapa.png")
-    except IOError:
-        pass
 
-    draw = ImageDraw.Draw(img)
-
-    for stop in list_of_stops:
-        stop.label_to_map(draw)
-
-    img.show()
