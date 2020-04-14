@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import math
 
-mapOfZilina = Image.open("mapa_okrsky.png").convert('RGB')
+mapOfZilina = Image.open("data/map_districts.png").convert('RGB')
 pix = mapOfZilina.load()
 
 w, h = mapOfZilina.size  # getting max. size of both axis
@@ -23,17 +23,17 @@ numberOfSquaresInRow = int(math.sqrt(numberOfSquaresOnMap))  # number of squares
 xLineOfSquare = int((XofBotRight - XofTopLeft) / numberOfSquaresInRow)  # x difference from square to square
 yLineOfSquare = int((YofBotRight - YofTopLeft) / numberOfSquaresInRow)  # y difference from square to square
 
-colors = np.genfromtxt('color-coding-okrsky.dat',
+colors = np.genfromtxt('data/zilina_color_coding_districts.dat',
                        dtype=None,
                        usecols=(1, 2, 3),
                        delimiter=' ')
 
-inhabitants = np.genfromtxt('number_inhabitants_okrsky.dat',
+inhabitants = np.genfromtxt('data/zilina_number_inhabitants_districts.dat',
                             dtype=None,
                             usecols=[1],
                             delimiter=' ')
 
-allPixelsOfColour = np.genfromtxt('number-pixels-in-okrsky.dat',
+allPixelsOfColour = np.genfromtxt('data/zilina_number_pixels_in_districts.dat',
                                   dtype=None,
                                   usecols=[1],
                                   delimiter='   ')
