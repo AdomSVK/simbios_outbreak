@@ -40,7 +40,7 @@ def gps_to_pixel_mapa_okrsky(latt, longit):
 def draw_map_with_stops(list_of_stops):
 
     try:
-        img  = Image.open("empty-mapa.png")
+        img  = Image.open("data/empty-mapa.png")
     except IOError:
         pass
 
@@ -51,7 +51,7 @@ def draw_map_with_stops(list_of_stops):
 
     img.show()
 
-    
+
 class Stop:
     def __init__(self, id, name, latt, longit, x, y):
         self.id = int(id)
@@ -77,7 +77,6 @@ class Stop:
 
     def getY(self):
         return self.y
-
 
 
 
@@ -117,10 +116,10 @@ class Square:
         return stop in self.stops
 
     def print(self):
-        print("Stvorec ", self.ID, ":")
-        print("\t lavy horny ", self.upper_left)
-        print("\t pravy dolny ", self.lower_right)
-        print("\t zastavky: ")
+        print("Square ", self.ID, ":")
+        print("\t upper left ", self.upper_left)
+        print("\t lower right ", self.lower_right)
+        print("\t stops: ")
         for stop in self.stops:
             print("\t \t", end=" ")
             stop.print()
@@ -213,7 +212,7 @@ class Map:
         return [(longit - zero_xGPS) / dxGPS * dx, (latt - zero_yGPS) / dyGPS * dy]
 
     def load_stops_to_squares(self):
-        list_of_stops = self.load_stops("idzastavky_suradnice_v2.txt")
+        list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
 
         for stop in list_of_stops:
             square_id = int(stop.getY() / self.square_size) * self.columns \
@@ -223,7 +222,7 @@ class Map:
             self.squares[square_id].stops.append(stop)
 
     def create_OD_matrix_by_squares(self, detail_matrix_csv_file_name):
-        list_of_stops = self.load_stops("idzastavky_suradnice_v2.txt")
+        list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
         OD_detailed = self.read_detail_matrix(detail_matrix_csv_file_name)
 
         # initialisation of coarse OD matrix
@@ -242,8 +241,8 @@ class Map:
                 j += 1
             i += 1
 
-        # TODO chceme dat prec stvorce ktore nemaju ziadne zastavky? Su take stvorce, ktore nemaju zastavky, ale maju obyvatelov?
-        # Ak hej, potom bude treba prerobit toto vyrabanie matice, aby islo pomocou square.ID
+        # TODO remove squares that do not have any inhabitants
+
 
     def read_detail_matrix(self, detail_matrix_file_name):
         with open(detail_matrix_file_name) as csv_file:
@@ -267,8 +266,3 @@ class Map:
                 total_number_of_trips += self.OD[i][j]
             print(" ")
         print("total number of trips: ", total_number_of_trips)
-
-
-
-
-
