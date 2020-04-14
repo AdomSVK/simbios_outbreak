@@ -38,7 +38,7 @@ allPixelsOfColour = np.genfromtxt('data/zilina_number_pixels_in_districts.dat',
                                   usecols=[1],
                                   delimiter='   ')
 
-# Printing information about objects{files
+# Printing information about objects/files
 # print(mapOfZilina)
 # print('\n', inhabitants)
 # print('\n', allPixelsOfColour)
