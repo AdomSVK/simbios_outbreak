@@ -2,7 +2,7 @@ from PIL import Image
 import numpy as np
 import math
 
-mapOfZilina = Image.open("data/map_districts.png").convert('RGB')
+mapOfZilina = Image.open("data/zilina_map_districts.png").convert('RGB')
 pix = mapOfZilina.load()
 
 w, h = mapOfZilina.size  # getting max. size of both axis
