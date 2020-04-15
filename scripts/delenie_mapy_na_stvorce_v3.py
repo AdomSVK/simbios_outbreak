@@ -1,4 +1,4 @@
-import outbreak.Map
+import outbreak
 
 mapa = Map("mapa_okrsky.png")     # dimensions: 1820 x 1624
 mapa.divide_into_squares(square_size = 400)
