@@ -51,6 +51,55 @@ def draw_map_with_stops(list_of_stops):
 
     img.show()
 
+def is_color_in_list_of_colors(color,list_colors):
+    for col in list_colors:
+        if color[0] == col[0] and color[1] == col[1] and color[2] == col[2]:
+            return 1
+    return 0
+
+def extract_districts_map(filename):
+    # takes the original map and creates a new file with only districts
+    try:
+        mapOfZilina  = Image.open(filename).convert('RGB')
+    except IOError:
+        pass
+
+    w, h = mapOfZilina.size  # getting max. size of both axis
+    colors = np.genfromtxt('data/zilina_color_coding_districts.dat',
+                       dtype=None,
+                       usecols=(1, 2, 3),
+                       delimiter=' ')
+    colourRange = 78
+    new_image = Image.new('RGB', (w, h))
+    for i in range(0, w):
+        print(str(i) + "/" + str(w))
+        for j in range(0, h):
+            current_color = mapOfZilina.getpixel( (i,j) )
+            if is_color_in_list_of_colors(current_color,colors) == 1:
+                new_image.putpixel( (i,j), current_color)
+            else:
+                new_image.putpixel( (i,j), (255,255,255))
+    new_image.save("data/zilina_map_only_districts.png")
+
+def overlay_map_with_districts():
+    # one-time function for corretcint the original map. Takes the empty map, takes the map with only districts and overlay them. 
+    try:
+        empty_map  = Image.open("data/zilina_map_empty.png").convert('RGB')
+    except IOError:
+        pass
+    try:
+        dist_map  = Image.open("data/zilina_map_only_districts.png").convert('RGB')
+    except IOError:
+        pass
+
+    w, h = empty_map.size  # getting max. size of both axis
+    for i in range(0, w):
+        print(str(i) + "/" + str(w))
+        for j in range(0, h):
+            col = dist_map.getpixel( (i,j) )
+            if col[0] != 255 or col[1] != 255 or col[2] != 255:
+                empty_map.putpixel( (i,j), col)
+    empty_map.save("data/zilina_map_districts_corrected.png")
 
 class Stop:
     def __init__(self, id, name, latt, longit, x, y):
@@ -290,3 +339,4 @@ class Map:
                 total_number_of_trips += self.OD[i][j]
             print(" ")
         print("total number of trips: ", total_number_of_trips)
+        
