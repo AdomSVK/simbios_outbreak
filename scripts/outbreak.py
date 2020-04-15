@@ -132,6 +132,7 @@ class Map:
     def __init__(self, image_file):
         try:
             img = Image.open(image_file)
+            self.image = img
         except IOError:
             pass
         self.img_width, self.img_height = img.size
@@ -140,6 +141,29 @@ class Map:
         self.rows = 0
         self.columns = 0
         self.OD = []   # origin-destination matrix
+
+    def draw_grid(self, pixel_step):
+        # Draw some lines
+        # step_count = 10
+        draw = ImageDraw.Draw(self.image)
+        y_start = 0
+        y_end = self.img_height
+        step_size = pixel_step #int(self.img_height / step_count)
+
+        for x in range(0, self.img_width, step_size):
+            line = ((x, y_start), (x, y_end))
+            draw.line(line, fill="black")
+
+        x_start = 0
+        x_end = self.img_width
+
+        for y in range(0, self.img_height, step_size):
+            line = ((x_start, y), (x_end, y))
+            draw.line(line, fill="black")
+        del draw
+
+    def show_map(self):
+        self.image.show()
 
     def divide_into_squares(self, square_size=50):
         # if the image dimensions are not multiples of square_size, the remaining areas on the left and bottom
