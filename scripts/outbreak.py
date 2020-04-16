@@ -409,7 +409,7 @@ class MapCityParts:
                        delimiter=' ')
         #print(info)
         for it in info:
-            tmp_city_part = CityPart(it[0])
+            tmp_city_part = CityPart()
             tmp_city_part.set_population(int(it[5]))
             tmp_city_part.set_color([int(it[1]),int(it[2]),int(it[3])])
             tmp_city_part.set_name(it[4])
@@ -519,12 +519,11 @@ class MapCityParts:
 
 class CityPart:
     # arbitrary geometrical part of the city
-    def __init__(self, ID):
+    def __init__(self):
         self.stops = []
         self.population = 0
         self.beta = 0
         self.color = []
-        self.ID = ID
         self.name = ""
 
     def set_population(self, population):
@@ -545,14 +544,11 @@ class CityPart:
     def get_name(self):
         return self.name
 
-    def get_ID(self):
-        return self.ID
-
     def set_parameter_beta(self, beta):
         self.beta = beta
 
     def print_info(self):
-        print("id "+ str(self.ID) + " name " + str(self.name) + " color " + str(self.color) + " pop " + str(self.population))
+        print(" name " + str(self.name) + " color " + str(self.color) + " pop " + str(self.population))
 
 
 
