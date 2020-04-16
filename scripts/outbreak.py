@@ -40,7 +40,7 @@ def gps_to_pixel_mapa_okrsky(latt, longit):
 def draw_map_with_stops(list_of_stops):
 
     try:
-        img  = Image.open("data/empty-mapa.png")
+        img  = Image.open("data/zilina_map_empty.png")
     except IOError:
         pass
 
@@ -52,6 +52,7 @@ def draw_map_with_stops(list_of_stops):
     img.show()
 
 def is_color_in_list_of_colors(color,list_colors):
+    # detects, whether given color exists in the list of colors. Return 1 if it does, returns 0 if it does not.
     for col in list_colors:
         if color[0] == col[0] and color[1] == col[1] and color[2] == col[2]:
             return 1
