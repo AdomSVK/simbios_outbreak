@@ -103,8 +103,10 @@ def overlay_map_with_districts():
     empty_map.save("data/zilina_map_districts_corrected.png")
 
 class Stop:
-    def __init__(self, id, name, latt, longit, x, y):
+    def __init__(self, id, id_in_list, name, latt, longit, x, y):
         self.id = int(id)
+        self.id_in_list = int(id_in_list)
+        #print(id_in_list)
         self.name = str(name)
         self.latt = float(latt)
         self.longit = float(longit)
@@ -112,7 +114,7 @@ class Stop:
         self.y = int(y)
         
     def label_to_map(self,draw):
-        font = ImageFont.truetype("arial.ttf", 15)
+        font = ImageFont.truetype("data/arial.ttf", 15)
         r = 3
         draw.ellipse((self.x-r, self.y-r, self.x+r, self.y+r), fill=(0,0,0,0))
 
@@ -257,6 +259,7 @@ class Map:
             lines.append(line.split())
 
         bus_stops = []
+        ii = 0
         for line in lines:
             id = line[0]
             latt = float(line[len(line) - 2])
@@ -267,7 +270,8 @@ class Map:
             tmp = self.gps_to_pixel_map_okrsky(latt, longit)
             x = tmp[0]
             y = tmp[1]
-            bus_stops.append(Stop(id, name, latt, longit, x, y))
+            bus_stops.append(Stop(id, ii, name, latt, longit, x, y))
+            ii = ii + 1
         return bus_stops
 
     def gps_to_pixel_map_okrsky(self, latt, longit):
@@ -341,3 +345,215 @@ class Map:
             print(" ")
         print("total number of trips: ", total_number_of_trips)
         
+class MapCityParts:
+    # [0,0] is in upper left corner
+
+    def __init__(self, image_file):
+        try:
+            img = Image.open(image_file)
+            self.image = img
+        except IOError:
+            pass
+        self.img_width, self.img_height = img.size
+        self.OD = []   # origin-destination matrix
+        self.city_parts = []
+
+    def show_map(self):
+        self.image.show()
+
+    def load_stops(self, filename):
+        f = open(filename, "r")
+        lines = []
+        for line in f:
+            lines.append(line.split())
+
+        bus_stops = []
+        ii = 0
+        for line in lines:
+            id = line[0]
+            latt = float(line[len(line) - 2])
+            longit = float(line[len(line) - 1])
+            name = ''
+            for i in range(1, len(line) - 2):
+                name = name + " " + line[i]
+            tmp = self.gps_to_pixel_map_okrsky(latt, longit)
+            x = tmp[0]
+            y = tmp[1]
+            bus_stops.append(Stop(id, ii, name, latt, longit, x, y))
+            ii = ii + 1
+        return bus_stops
+
+    def gps_to_pixel_map_okrsky(self, latt, longit):
+        # calibration points
+        # x-axis: 441 = 18.70737, 1310 = 18.78205
+        # y-axis: 381 = 49.2449, 1540 = 49.17981
+
+        dx = 1310 - 441
+        dxGPS = 18.78205 - 18.70737
+        dy = 1540 - 381
+        dyGPS = 49.17981 - 49.2449
+
+        zero_xGPS = 18.70737 - 441.0 * dxGPS / dx
+        zero_yGPS = 49.2449 - 381.0 * dyGPS / dy
+
+        return [(longit - zero_xGPS) / dxGPS * dx, (latt - zero_yGPS) / dyGPS * dy]
+
+
+    def divide_into_city_parts(self, color_coding_file, parts_map):
+        # when creating squares, the OD matrix is erased to prevent errors
+        self.OD = []
+        
+        info = np.genfromtxt(color_coding_file,
+                       dtype=None,
+                       usecols=(0, 1, 2, 3, 4, 5),
+                       delimiter=' ')
+        #print(info)
+        for it in info:
+            tmp_city_part = CityPart(it[0])
+            tmp_city_part.set_population(int(it[5]))
+            tmp_city_part.set_color([int(it[1]),int(it[2]),int(it[3])])
+            tmp_city_part.set_name(it[4])
+            self.city_parts.append(tmp_city_part)
+            
+    def load_stops_to_city_parts(self):
+        list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
+        img_tmp = self.image.convert('RGB')
+
+        for stop in list_of_stops:
+            stop_color = img_tmp.getpixel((stop.x,stop.y))
+            for part in self.city_parts:
+                if stop_color[0] == part.color[0] and stop_color[1] == part.color[1] and stop_color[2] == part.color[2]:
+                    stop_color_known = 1
+            if stop.id == 1: #asanacny
+                self.city_parts[9].stops.append(stop)
+            if stop.id == 3: #bratislavska
+                self.city_parts[6].stops.append(stop)
+            if stop.id == 24:
+                self.city_parts[6].stops.append(stop)
+            if stop.id == 25:
+                self.city_parts[6].stops.append(stop)
+            if stop.id == 29:
+                self.city_parts[8].stops.append(stop)
+            if stop.id == 69:
+                self.city_parts[2].stops.append(stop)
+            if stop.id == 70:
+                self.city_parts[3].stops.append(stop)
+            if stop.id == 74:
+                self.city_parts[6].stops.append(stop)
+            if stop.id == 80:
+                self.city_parts[10].stops.append(stop)
+            if stop.id == 87:
+                self.city_parts[4].stops.append(stop)
+            if stop.id == 89:
+                self.city_parts[7].stops.append(stop)
+            if stop.id == 97:
+                self.city_parts[6].stops.append(stop)
+            if stop.id == 105:
+                self.city_parts[9].stops.append(stop)
+            if stop.id == 123:
+                self.city_parts[8].stops.append(stop)
+                # need correction
+                # ASAN 1 10
+                # Bratislavska 3 7
+                # Hricovsk 24 7
+                # Priehrada 25 7
+                # Hviezdoslavova 29 9
+                # Pazite 69 3
+                # Pietna 70 4
+                # Pod zahradkou 74 7
+                # Pri celulozke 80 11
+                # Raj.elektr 87 5
+                # Rajecka mliekaren 89 8
+                # Razc Hric 97 7
+                # Sibenice 105 10
+                # Zel. stanica 123 9
+#        for stop in self.city_parts[8].stops:
+#            print(stop.name)
+
+
+    def create_OD_matrix_by_city_parts(self, detail_matrix_csv_file_name):
+        list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
+        OD_detailed = self.read_detail_matrix(detail_matrix_csv_file_name)
+        
+        # initialisation of coarse OD matrix
+        self.OD = [[0 for i in range(len(self.city_parts))] for j in range(len(self.city_parts))]
+
+        for i in range(0,len(self.city_parts)):
+            for j in range(0,len(self.city_parts)):
+                part_from = self.city_parts[i]
+                part_to = self.city_parts[j]
+                travelers = 0                
+                for stop_from in part_from.stops:                    
+                    for stop_to in part_to.stops:
+                        #print(OD_detailed[stop_from.id_in_list][stop_to.id_in_list])
+                        travelers += int(OD_detailed[stop_from.id_in_list][stop_to.id_in_list])
+                self.OD[i][j] = travelers
+
+    def print_city_parts(self):
+        for part in self.city_parts:
+            part.print_info()   
+
+    def read_detail_matrix(self, detail_matrix_file_name):
+        with open(detail_matrix_file_name) as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            i = 0
+            OD = []
+            for row in csv_reader:
+                if i > 0:
+                    ODline = []
+                    for k in range(1, len(row)):
+                        ODline.append(row[k])
+                    OD.append(ODline)
+                i = i + 1
+            return OD
+
+
+    def draw_map_with_stops(self):
+        list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
+        draw = ImageDraw.Draw(self.image)
+    
+        for stop in list_of_stops:
+            stop.label_to_map(draw)
+    
+        self.image.show()
+
+class CityPart:
+    # arbitrary geometrical part of the city
+    def __init__(self, ID):
+        self.stops = []
+        self.population = 0
+        self.beta = 0
+        self.color = []
+        self.ID = ID
+        self.name = ""
+
+    def set_population(self, population):
+        self.population = population
+
+    def get_population(self):
+        return self.population
+
+    def set_color(self, color):
+        self.color = color
+
+    def get_population(self):
+        return self.color
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+
+    def get_ID(self):
+        return self.ID
+
+    def set_parameter_beta(self, beta):
+        self.beta = beta
+
+    def print_info(self):
+        print("id "+ str(self.ID) + " name " + str(self.name) + " color " + str(self.color) + " pop " + str(self.population))
+
+
+
+ 
