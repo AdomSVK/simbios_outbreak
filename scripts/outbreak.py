@@ -399,8 +399,8 @@ class MapCityParts:
         return [(longit - zero_xGPS) / dxGPS * dx, (latt - zero_yGPS) / dyGPS * dy]
 
 
-    def divide_into_city_parts(self, color_coding_file, parts_map):
-        # when creating squares, the OD matrix is erased to prevent errors
+    def divide_into_city_parts(self, color_coding_file):
+        # when creating city parts, the OD matrix is erased to prevent errors
         self.OD = []
         
         info = np.genfromtxt(color_coding_file,
@@ -424,6 +424,7 @@ class MapCityParts:
             for part in self.city_parts:
                 if stop_color[0] == part.color[0] and stop_color[1] == part.color[1] and stop_color[2] == part.color[2]:
                     stop_color_known = 1
+                    part.stops.append(stop)
             if stop.id == 1: #asanacny
                 self.city_parts[9].stops.append(stop)
             if stop.id == 3: #bratislavska
@@ -467,9 +468,6 @@ class MapCityParts:
                 # Razc Hric 97 7
                 # Sibenice 105 10
                 # Zel. stanica 123 9
-#        for stop in self.city_parts[8].stops:
-#            print(stop.name)
-
 
     def create_OD_matrix_by_city_parts(self, detail_matrix_csv_file_name):
         list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
@@ -535,7 +533,7 @@ class CityPart:
     def set_color(self, color):
         self.color = color
 
-    def get_population(self):
+    def get_color(self):
         return self.color
 
     def set_name(self, name):
@@ -549,6 +547,9 @@ class CityPart:
 
     def print_info(self):
         print(" name " + str(self.name) + " color " + str(self.color) + " pop " + str(self.population))
+        print("stops:\n")
+        for stop in self.stops:
+            print(stop.name)
 
 
 
