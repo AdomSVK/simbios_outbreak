@@ -47,14 +47,14 @@ secondTypeOfGrid = np.genfromtxt('data/sqare3cm.dat',
 
 TotalIDsPixelCount = []  # total pixels of different colour ID on one big square
 totalSumOfInhabitantsInMap = 0
-numberOfSquaresInColumn = 0
+numberOfSquaresInColumn = -1
 numberOfSquaresInRow = 0
 summed = 0
 
-for h in range(firstTypeOfGrid.shape[0]):
+for h in range(secondTypeOfGrid.shape[0]):
     if summed == 0:
         numberOfSquaresInColumn += 1
-    if firstTypeOfGrid[h][0] == 0:
+    if secondTypeOfGrid[h][0] == 0:
         numberOfSquaresInRow += 1
         if h != 0:
             summed = 1
@@ -72,14 +72,14 @@ for i in range(0, colourRange):
 g = 0
 f = 0
 
-for h in range(firstTypeOfGrid.shape[0]):  # each square in a row
+for h in range(secondTypeOfGrid.shape[0]):  # each square
     IDsPixelCount = []  # each square pixels of different colour ID
 
     for i in range(0, colourRange):
         IDsPixelCount.append(0)
 
-    for i in range(firstTypeOfGrid[h][0], firstTypeOfGrid[h][2]):
-        for j in range(firstTypeOfGrid[h][1], firstTypeOfGrid[h][3]):
+    for i in range(secondTypeOfGrid[h][0], secondTypeOfGrid[h][2]):
+        for j in range(secondTypeOfGrid[h][1], secondTypeOfGrid[h][3]):
             for k in range(0, colourRange):
                 theSame = 1
                 for m in range(RGB):
@@ -97,13 +97,14 @@ for h in range(firstTypeOfGrid.shape[0]):  # each square in a row
         inhabitantsInSquare.append(IDsPixelCount[i] / allPixelsOfColour[i] * inhabitants[i])
         sumOfInhabitantsInSquare += inhabitantsInSquare[i]
 
+    if g == numberOfSquaresInColumn:
+        g = 0
+        f += 1
+
     sumOfInhabitantsInSquareMatrix[f][g] = sumOfInhabitantsInSquare
     totalSumOfInhabitantsInMap += sumOfInhabitantsInSquare
 
     g += 1
-    if g == numberOfSquaresInColumn:
-        g = 0
-        f += 1
 
 for i in range(colourRange):
     print(i + 2, " ", TotalIDsPixelCount[i])
