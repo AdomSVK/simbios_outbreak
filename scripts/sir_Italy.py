@@ -16,16 +16,16 @@ i.append(N - s[0])
 r.append(0)
 d.append(0)
 
-gamma = 0.03
-beta = 0.26
-alfa = 0.02
+gamma = 0.036
+beta = 0.3
+alfa = 0.002
 
 days = 0
 while days < N_days:
     if days == 47:
         gamma = 0.02
-        beta = 0.17
-        alfa = 0.018
+        beta = 0.155
+        #alfa = 0.018
     days = days + 1
     s_t = s[days - 1]
     i_t = i[days - 1]
@@ -44,8 +44,10 @@ plt.plot(da,r,label='recovered (model)')
 plt.plot(da,d,label='death (model)')
 #plt.plot(da,s,da,i,da,r,da,d)
 
-filename = 'ItalyCovid.csv'
+filename = 'data/ItalyCovid.csv'
 recovered, infected, deaths = get_csv_data(filename)
+infected = [6*inf for inf in infected]
+recovered = [6*rec for rec in recovered]
 plt.plot(infected,label='infected')
 plt.plot(recovered,label='recovered')
 plt.plot(deaths,label='death')
