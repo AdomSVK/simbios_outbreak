@@ -1,2 +1,3 @@
 # simbios_outbreak
-Project simbios repository for research about corona virus.
+Spatial SIRD models for COVID-19 spreading in cities. 
+Available under GNU GPL v3.
