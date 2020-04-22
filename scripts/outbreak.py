@@ -4,7 +4,6 @@ import csv
 
 import matplotlib.pyplot as plt
 
-
 def pixel_to_gps_mapa_okrsky(x, y):
     # calibration points
     # x-axis: 441 = 18.70737, 1310 = 18.78205
@@ -246,6 +245,17 @@ class RegistredCovCase:
               "patient_adressOfStay_Street: " + self.patient_addressOfStay_Street + " , " + "city_latitude: " + str(self.city_latitude) + " , " + "city_longitude: " + str(self.city_longitude) + " , " + "street_latitude: " + str(self.street_latitude) + " , " + "street_longitude: " + str(self.street_longitude) + " , " +
               "note: " + self.note + " , " + "is_public: " + str(self.is_public))
 
+
+
+
+class Municipality:
+    def __init__(self):
+        self.name = ""
+        # TODO divide population into SIRD groups
+        self.population = -1
+        self.infected = []
+        self.flow_from_Zilina = -1
+        self.flow_to_Zilina = -1
 
 class Square:
     # geometrically, this can also be a rectangle
