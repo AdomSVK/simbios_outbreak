@@ -51,6 +51,93 @@ def draw_map_with_stops(list_of_stops):
 
     img.show()
 
+#parsing whole feed step by step
+def parse_feed_to_parts(feed):
+    #load feed from .txt file and split it into small parts containing information about one patient + create emptz array of covid cases
+    registered_covid_cases = []
+    f = open(feed)
+    big_string = f.read()
+    #string_array = []
+    string_array = big_string.split("},{")
+
+    #remove '{' and '}' character from strings
+    i = 0
+    while i < len(string_array):
+        string_array[i] = string_array[i].translate({ord(i): None for i in '{}'})
+        #string_array[i] = string_array[i].replace('"', '')
+        i += 1
+
+    # help print
+    #i = 0
+    #while i < len(string_array):
+        #print(string_array[i])
+        #i += 1
+
+    #splitting patient information to smaller parts and creating single patient from it
+    i = 0
+    while i < len(string_array):
+
+        particle = string_array[i].split(',"')
+
+        j = 0
+        while j < len(particle):
+            help_particle = particle[j].split('":')
+            del help_particle[0]
+            particle[j] = help_particle[0]
+            j += 1
+        try:
+            patient_ordinal_number = int(particle[0].replace('"',''))
+        except ValueError:
+            patient_ordinal_number = 0
+        covid19_suspected_at = str(particle[1])
+        covid19_confirmed_positive_at = str(particle[2])
+        covid19_confirmed_negative_at = str(particle[3])
+        patient_recovered_at = str(particle[4])
+        patient_deceased_at = str(particle[5])
+        patient_sex = str(particle[6])
+        patient_age = int(particle[7].replace('"',''))
+        category = str(particle[8])
+        patient_addressOfStay_City = str(particle[9])
+        patient_addressOfStay_Street = str(particle[10])
+        try:
+            city_latitude = float(particle[11].replace('"',''))
+        except ValueError:
+            city_latitude = 0.0
+        try:
+            city_longitude = float(particle[12].replace('"',''))
+        except:
+            city_longitude = 0.0
+        try:
+            street_latitude = float(particle[13].replace('"',''))
+        except ValueError:
+            street_latitude = 0.0
+        try:
+            street_longitude = float(particle[14].replace('"',''))
+        except ValueError:
+            street_longitude = 0.0
+        note = str(particle[15])
+        try:
+            is_public = int(particle[16].replace('"',''))
+        except ValueError:
+            is_public = 0
+
+        covid_case = RegistredCovCase(patient_ordinal_number, covid19_suspected_at, covid19_confirmed_positive_at, covid19_confirmed_negative_at,
+                                      patient_recovered_at, patient_deceased_at, patient_sex, patient_age, category, patient_addressOfStay_City, patient_addressOfStay_Street,
+                                      city_latitude, city_longitude, street_latitude, street_longitude, note, is_public)
+        registered_covid_cases.append(covid_case)
+        i += 1
+
+    #help print
+    #i = 0
+    #while i < len(particle):
+        #print(i, particle[i])
+        #i += 1
+    for x in range(0, len(registered_covid_cases)):
+        registered_covid_cases[x].print_info()
+
+    return registered_covid_cases
+
+
 def is_color_in_list_of_colors(color,list_colors):
     # detects, whether given color exists in the list of colors. Return 1 if it does, returns 0 if it does not.
     for col in list_colors:
@@ -130,6 +217,34 @@ class Stop:
     def getY(self):
         return self.y
 
+class RegistredCovCase:
+    def __init__(self, patient_ordinal_number, covid19_suspected_at, covid19_confirmed_positive_at, covid19_confirmed_negative_at, patient_recovered_at, patient_deceased_at,
+                 patient_sex, patient_age, category, patient_addressOfStay_City, patient_addressOfStay_Street, city_latitude, city_longitude, street_latitude, street_longitude,
+                 note, is_public):
+        self.patient_ordinal_number = int(patient_ordinal_number)
+        self.covid19_suspected_at = str(covid19_suspected_at)
+        self.covid19_confirmed_positive_at = str(covid19_confirmed_positive_at)
+        self.covid19_confirmed_negative_at = str(covid19_confirmed_negative_at)
+        self.patient_recovered_at = str(patient_recovered_at)
+        self.patient_deceased_at = str(patient_deceased_at)
+        self.patient_sex = str(patient_sex)
+        self.patient_age = int(patient_age)
+        self.category = str(category)
+        self.patient_addressOfStay_City = str(patient_addressOfStay_City)
+        self.patient_addressOfStay_Street = str(patient_addressOfStay_Street)
+        self.city_latitude = float(city_latitude)
+        self.city_longitude = float(city_longitude)
+        self.street_latitude = float(street_latitude)
+        self.street_longitude = float(street_longitude)
+        self.note = str(note)
+        self.is_public = int(is_public)
+
+    def print_info(self):
+        print("patient_ordinal_number: " + str(self.patient_ordinal_number) + " , " + "covid19_suspected_at: " + self.covid19_suspected_at + " , " + "covid19_confirmed_positive_at: " + self.covid19_confirmed_positive_at + " , " +
+              "covid19_confirmed_negative_at: " + self.covid19_confirmed_negative_at + " , " + "patient_recovered_at: " + self.patient_recovered_at + " , " + "patient_deceased_at: " + self.patient_deceased_at + " , " +
+              "patient_sex: " + " , " + self.patient_sex + " , " + "patient_age: " + str(self.patient_age) + " , " + "category: " + self.category + " , " + "patient_adressOfStay_City: " + self.patient_addressOfStay_City + " , " +
+              "patient_adressOfStay_Street: " + self.patient_addressOfStay_Street + " , " + "city_latitude: " + str(self.city_latitude) + " , " + "city_longitude: " + str(self.city_longitude) + " , " + "street_latitude: " + str(self.street_latitude) + " , " + "street_longitude: " + str(self.street_longitude) + " , " +
+              "note: " + self.note + " , " + "is_public: " + str(self.is_public))
 
 
 class Square:
