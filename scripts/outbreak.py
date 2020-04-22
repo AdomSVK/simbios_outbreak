@@ -143,6 +143,10 @@ class Square:
         self.upper_left = upper_left
         self.lower_right = lower_right
         self.ID = ID
+        self.illSymptoms = 0
+
+    def get_illSymptoms(self):
+        return self.illSymptoms
 
     def set_population(self, population):
         self.population = population
@@ -212,6 +216,57 @@ class Map:
         for y in range(0, self.img_height, step_size):
             line = ((x_start, y), (x_end, y))
             draw.line(line, fill="black")
+        del draw
+
+    #Using Trasparency
+    def color_square_stategy_max_ill(self):
+
+        max_ill = 0
+
+        if len(self.squares) == 0:
+            raise Exception("Missing squares!")
+
+        for x in self.squares:
+            if max_ill < x.get_illSymptoms():
+                max_ill = x.get_illSymptoms()
+
+        if max_ill == 0:
+            raise Exception("0 sick persons!")
+
+        COLOR = (255, 0, 0)  # Red
+
+        self.image = self.image.convert("RGBA")
+        overlay = Image.new('RGBA', self.image.size, COLOR + (0,))
+        draw = ImageDraw.Draw(overlay)
+
+        for x in self.squares:
+            TRANSPARENCY =  (x.get_illSymptoms()/max_ill) # Degree of transparency, 0-100%
+            OPACITY = int(255 * TRANSPARENCY)
+            draw.rectangle([(x.upper_left[0],x.upper_left[1]), (x.lower_right[0],x.lower_right[1])], fill=COLOR + (OPACITY,))
+
+        self.image= Image.alpha_composite(self.image, overlay)
+        self.image = self.image.convert("RGB")
+        del draw
+
+    #Using Transparency
+    def color_square_strategy_square_max_population(self):
+
+        if len(self.squares) == 0:
+            raise Exception("Missing squares!")
+
+        COLOR = (255, 0, 0)  # Red
+
+        self.image = self.image.convert("RGBA")
+        overlay = Image.new('RGBA', self.image.size, COLOR + (0,))
+        draw = ImageDraw.Draw(overlay)
+
+        for x in self.squares:
+            TRANSPARENCY =  (x.get_illSymptoms()/x.get_population()) # Degree of transparency, 0-100%
+            OPACITY = int(255 * TRANSPARENCY)
+            draw.rectangle([(x.upper_left[0],x.upper_left[1]), (x.lower_right[0],x.lower_right[1])], fill=COLOR + (OPACITY,))
+
+        self.image= Image.alpha_composite(self.image, overlay)
+        self.image = self.image.convert("RGB")
         del draw
 
     def show_map(self):
