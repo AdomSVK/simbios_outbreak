@@ -253,7 +253,7 @@ def load_json_virus_spread():
     with open('data/SR_virus_spread_across_unicipalities_v17april_MRandMGmodel.json') as f:
         data = json.load(f)
 
-    Municipalities = []
+    municipalities = []
 
     city_names = data['city_names']
     city_sizes = data['city_sizes']
@@ -262,21 +262,20 @@ def load_json_virus_spread():
     for x in city_names:
         insert = Municipality()
         insert.name = x
-        Municipalities.append(insert)
+        municipalities.append(insert)
 
     i = 0
     for x in city_sizes:
-        Municipalities[i].population = x
+        municipalities[i].population = x
         i += 1
-
 
     for days in infected:
         i = 0
         for city_x in days:
-            Municipalities[i].infected.append(city_x)
+            municipalities[i].infected.append(city_x)
             i += 1
 
-    return Municipalities
+    return municipalities
 
 
 class Municipality:
