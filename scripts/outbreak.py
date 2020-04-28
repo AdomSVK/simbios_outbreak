@@ -428,6 +428,13 @@ class Map:
                       end = ", ")
             print(" ")
 
+    def print_squares_to_file(self, filename):
+        outfile = open(filename, "w")
+        for square in self.squares:
+            outfile.write(str(square.upper_left[0]) + " " + str(square.upper_left[1]) + " "
+                          + str(square.lower_right[0]) + " " + str(square.lower_right[1]))
+        outfile.close()
+
     def print_squares_with_stops(self):
         for square in self.squares:
             square.print()
