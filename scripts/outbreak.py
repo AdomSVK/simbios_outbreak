@@ -4,7 +4,6 @@ import csv
 
 import matplotlib.pyplot as plt
 
-
 def pixel_to_gps_mapa_okrsky(x, y):
     # calibration points
     # x-axis: 441 = 18.70737, 1310 = 18.78205
@@ -247,6 +246,17 @@ class RegistredCovCase:
               "note: " + self.note + " , " + "is_public: " + str(self.is_public))
 
 
+
+
+class Municipality:
+    def __init__(self):
+        self.name = ""
+        # TODO divide population into SIRD groups
+        self.population = -1
+        self.infected = []
+        self.flow_from_Zilina = -1
+        self.flow_to_Zilina = -1
+
 class Square:
     # geometrically, this can also be a rectangle
 
@@ -258,6 +268,10 @@ class Square:
         self.upper_left = upper_left
         self.lower_right = lower_right
         self.ID = ID
+        self.illSymptoms = 0
+
+    def get_illSymptoms(self):
+        return self.illSymptoms
 
     def set_population(self, population):
         self.population = population
@@ -329,6 +343,57 @@ class Map:
             draw.line(line, fill="black")
         del draw
 
+    #Using Trasparency
+    def color_square_stategy_max_ill(self):
+
+        max_ill = 0
+
+        if len(self.squares) == 0:
+            raise Exception("Missing squares!")
+
+        for x in self.squares:
+            if max_ill < x.get_illSymptoms():
+                max_ill = x.get_illSymptoms()
+
+        if max_ill == 0:
+            raise Exception("0 sick persons!")
+
+        COLOR = (255, 0, 0)  # Red
+
+        self.image = self.image.convert("RGBA")
+        overlay = Image.new('RGBA', self.image.size, COLOR + (0,))
+        draw = ImageDraw.Draw(overlay)
+
+        for x in self.squares:
+            TRANSPARENCY =  (x.get_illSymptoms()/max_ill) # Degree of transparency, 0-100%
+            OPACITY = int(255 * TRANSPARENCY)
+            draw.rectangle([(x.upper_left[0],x.upper_left[1]), (x.lower_right[0],x.lower_right[1])], fill=COLOR + (OPACITY,))
+
+        self.image= Image.alpha_composite(self.image, overlay)
+        self.image = self.image.convert("RGB")
+        del draw
+
+    #Using Transparency
+    def color_square_strategy_square_max_population(self):
+
+        if len(self.squares) == 0:
+            raise Exception("Missing squares!")
+
+        COLOR = (255, 0, 0)  # Red
+
+        self.image = self.image.convert("RGBA")
+        overlay = Image.new('RGBA', self.image.size, COLOR + (0,))
+        draw = ImageDraw.Draw(overlay)
+
+        for x in self.squares:
+            TRANSPARENCY =  (x.get_illSymptoms()/x.get_population()) # Degree of transparency, 0-100%
+            OPACITY = int(255 * TRANSPARENCY)
+            draw.rectangle([(x.upper_left[0],x.upper_left[1]), (x.lower_right[0],x.lower_right[1])], fill=COLOR + (OPACITY,))
+
+        self.image= Image.alpha_composite(self.image, overlay)
+        self.image = self.image.convert("RGB")
+        del draw
+
     def show_map(self):
         self.image.show()
 
@@ -362,6 +427,13 @@ class Map:
                       self.squares[self.columns * i + j].lower_right,
                       end = ", ")
             print(" ")
+
+    def print_squares_to_file(self, filename):
+        outfile = open(filename, "w")
+        for square in self.squares:
+            outfile.write(str(square.upper_left[0]) + " " + str(square.upper_left[1]) + " "
+                          + str(square.lower_right[0]) + " " + str(square.lower_right[1]))
+        outfile.close()
 
     def print_squares_with_stops(self):
         for square in self.squares:
