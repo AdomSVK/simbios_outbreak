@@ -257,7 +257,7 @@ def load_json_virus_spread():
 
     city_names = data['city_names']
     city_sizes = data['city_sizes']
-    infected = data['data']['susceptible']
+    infected = data['data']['infected']
 
     for x in city_names:
         insert = Municipality()
