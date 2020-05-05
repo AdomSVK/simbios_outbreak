@@ -24,11 +24,6 @@ inhabitants = np.genfromtxt('data/zilina_number_inhabitants_districts.dat',
                             usecols=[1],
                             delimiter=' ')
 
-allPixelsOfColour = np.genfromtxt('data/zilina_number_pixels_in_districts.dat',
-                                  dtype=None,
-                                  usecols=[1],
-                                  delimiter='   ')
-
 firstTypeOfGrid = np.genfromtxt('data/sqare1cm.dat',
                                 dtype=None,
                                 usecols=None,
@@ -40,7 +35,7 @@ secondTypeOfGrid = np.genfromtxt('data/sqare3cm.dat',
                                  delimiter=" ")
 
 # Printing information about objects/files
-# print(mapOfZilina)
+print(mapOfZilina)
 # print('\n', inhabitants)
 # print('\n', allPixelsOfColour)
 # print(firstTypeOfGrid)
@@ -69,6 +64,18 @@ for i in range(numberOfSquaresInRow):
 for i in range(0, colourRange):
     TotalIDsPixelCount.append(0)
 
+for h in range(secondTypeOfGrid.shape[0]):
+    for i in range(secondTypeOfGrid[h][0], secondTypeOfGrid[h][2]):
+        for j in range(secondTypeOfGrid[h][1], secondTypeOfGrid[h][3]):
+            for k in range(0, colourRange):
+                theSame = 1
+                for m in range(RGB):
+                    if colors[k][m] != pix[i, j][m]:
+                        theSame = 0
+                        break
+                if theSame:
+                    TotalIDsPixelCount[k] += 1
+
 g = 0
 f = 0
 
@@ -88,14 +95,17 @@ for h in range(secondTypeOfGrid.shape[0]):  # each square
                         break
                 if theSame:
                     IDsPixelCount[k] += 1
-                    TotalIDsPixelCount[k] += 1
 
     inhabitantsInSquare = []  # array of inhabitants in small square
     sumOfInhabitantsInSquare = 0  # sum of all inhabitants in small square
 
     for i in range(0, colourRange):
-        inhabitantsInSquare.append(IDsPixelCount[i] / allPixelsOfColour[i] * inhabitants[i])
-        sumOfInhabitantsInSquare += inhabitantsInSquare[i]
+        if TotalIDsPixelCount[i] != 0:
+            inhabitantsInSquare.append(IDsPixelCount[i] / TotalIDsPixelCount[i] * inhabitants[i])
+            sumOfInhabitantsInSquare += int(inhabitantsInSquare[i])
+        else:
+            inhabitantsInSquare.append(0)
+            sumOfInhabitantsInSquare += inhabitantsInSquare[i]
 
     if g == numberOfSquaresInColumn:
         g = 0

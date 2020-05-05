@@ -1,6 +1,8 @@
 from PIL import Image, ImageDraw, ImageFont, ImageDraw
 import numpy as np
 import csv
+import json
+
 
 import matplotlib.pyplot as plt
 
@@ -246,6 +248,34 @@ class RegistredCovCase:
               "note: " + self.note + " , " + "is_public: " + str(self.is_public))
 
 
+def load_json_virus_spread():
+
+    with open('data/SR_virus_spread_across_unicipalities_v17april_MRandMGmodel.json') as f:
+        data = json.load(f)
+
+    municipalities = []
+
+    city_names = data['city_names']
+    city_sizes = data['city_sizes']
+    infected = data['data']['infected']
+
+    for x in city_names:
+        insert = Municipality()
+        insert.name = x
+        municipalities.append(insert)
+
+    i = 0
+    for x in city_sizes:
+        municipalities[i].population = x
+        i += 1
+
+    for days in infected:
+        i = 0
+        for city_x in days:
+            municipalities[i].infected.append(city_x)
+            i += 1
+
+    return municipalities
 
 
 class Municipality:
@@ -256,6 +286,8 @@ class Municipality:
         self.infected = []
         self.flow_from_Zilina = -1
         self.flow_to_Zilina = -1
+
+
 
 class Square:
     # geometrically, this can also be a rectangle
