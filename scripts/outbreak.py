@@ -277,6 +277,36 @@ def load_json_virus_spread():
 
     return municipalities
 
+def load_pickle_matrix(file):
+    try:
+        matrix = np.load(file, allow_pickle=True)
+        print("Matrix succesfully loaded !")
+    except IOError:
+        print("Can't load this file !")
+        pass
+    municipality_array = []
+    #1402 riadok aj stlpec je ZA
+
+    for i in range(0, len(matrix)):                         #na riadku i a stlpci j je pocet obyvatelov, ktori sa presuvaju z mesta i do mesta j
+        municipality = Municipality()
+        municipality.name = str(i)
+        municipality.flow_from_Zilina = matrix[1402][i]
+        municipality.flow_to_Zilina = matrix[i][1402]
+        municipality_array.append(municipality)
+
+    print("Country: " + str(municipality_array[0].name) + ", flow_from_ZA: " + str(
+        municipality_array[0].flow_from_Zilina) + ", flow_to_ZA: " + str(municipality_array[0].flow_to_Zilina))
+    print("Country: " + str(municipality_array[1].name) + ", flow_from_ZA: " + str(
+        municipality_array[1].flow_from_Zilina) + ", flow_to_ZA: " + str(municipality_array[1].flow_to_Zilina))
+    print("Country: " + str(municipality_array[2].name) + ", flow_from_ZA: " + str(
+        municipality_array[2].flow_from_Zilina) + ", flow_to_ZA: " + str(municipality_array[2].flow_to_Zilina))
+    print("Country: " + str(municipality_array[1402].name) + ", flow_from_ZA: " + str(
+        municipality_array[1402].flow_from_Zilina) + ", flow_to_ZA: " + str(municipality_array[1402].flow_to_Zilina))
+    #print(np.matrix(matrix))
+    print(matrix[0][0])
+    print(matrix[1402][1402])
+    print(matrix[0][1402])
+    print(matrix[1402][0])
 
 class Municipality:
     def __init__(self):
