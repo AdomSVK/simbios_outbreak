@@ -1,7 +1,4 @@
-import sys, os, math, csv
-import matplotlib.pyplot as plt
-import numpy as np
-from outbreak import *
+from scripts.outbreak import *
 
 ##########################
 # 
@@ -55,7 +52,6 @@ def init():
 
     # load infected
     info = np.genfromtxt("data/zilina_city_parts_infected.dat",
-                       dtype=None,
                        usecols=(0, 1, 2),
                        delimiter=' ')
 
@@ -118,9 +114,9 @@ def update():
         InfA[j] = InfA_tmp[j]
         InfS[j] = InfS_tmp[j]
 
+
 M_OD, names_city_parts = init()
 print(names_city_parts)
-
 
 days = 0
 

@@ -56,7 +56,7 @@ def draw_map_with_stops(list_of_stops):
 def parse_feed_to_parts(feed):
     #load feed from .txt file and split it into small parts containing information about one patient + create emptz array of covid cases
     registered_covid_cases = []
-    f = open(feed)
+    f = open(feed, errors='ignore')
     big_string = f.read()
     #string_array = []
     string_array = big_string.split("},{")
@@ -250,7 +250,7 @@ class RegistredCovCase:
 
 def load_json_virus_spread():
 
-    with open('data/SR_virus_spread_across_unicipalities_v17april_MRandMGmodel.json') as f:
+    with open('data/SR_virus_spread_across_unicipalities_v17april_MRandMGmodel.json', errors='ignore') as f:
         data = json.load(f)
 
     municipalities = []
@@ -491,7 +491,7 @@ class Map:
             print(" ")
 
     def print_squares_to_file(self, filename):
-        outfile = open(filename, "w")
+        outfile = open(filename, "w", errors='ignore')
         for square in self.squares:
             outfile.write(str(square.upper_left[0]) + " " + str(square.upper_left[1]) + " "
                           + str(square.lower_right[0]) + " " + str(square.lower_right[1]))
@@ -502,7 +502,7 @@ class Map:
             square.print()
 
     def load_stops(self, filename):
-        f = open(filename, "r")
+        f = open(filename, "r", errors='ignore')
         lines = []
         for line in f:
             lines.append(line.split())
@@ -572,7 +572,7 @@ class Map:
 
 
     def read_detail_matrix(self, detail_matrix_file_name):
-        with open(detail_matrix_file_name) as csv_file:
+        with open(detail_matrix_file_name, errors='ignore') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             i = 0
             OD = []
@@ -611,7 +611,7 @@ class MapCityParts:
         self.image.show()
 
     def load_stops(self, filename):
-        f = open(filename, "r")
+        f = open(filename, "r", errors='ignore')
         lines = []
         for line in f:
             lines.append(line.split())
@@ -653,7 +653,7 @@ class MapCityParts:
         self.OD = []
         
         info = np.genfromtxt(color_coding_file,
-                       dtype=None,
+                       dtype=(int, int, int, int, "|S10", int),
                        usecols=(0, 1, 2, 3, 4, 5),
                        delimiter=' ')
         #print(info)
@@ -741,7 +741,7 @@ class MapCityParts:
             part.print_info()   
 
     def read_detail_matrix(self, detail_matrix_file_name):
-        with open(detail_matrix_file_name) as csv_file:
+        with open(detail_matrix_file_name, errors='ignore') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             i = 0
             OD = []
