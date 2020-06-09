@@ -1,4 +1,4 @@
-from outbreak import Map
+from scripts.outbreak import Map
 
 mapa = Map("data/zilina_map_districts.png")     # dimensions: 1820 x 1624
 mapa.divide_into_squares(square_size = 400)
