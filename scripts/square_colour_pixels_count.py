@@ -10,7 +10,6 @@ pd.set_option('display.max_colwidth', None)
 mapOfZilina = Image.open("data/zilina_map_districts.png").convert('RGB')
 pix = mapOfZilina.load()
 
-startingPosition = 2  # starting position of ID in a file
 colourRange = 78  # colour range from the file
 RGB = 3  # number of main colours in RGB model
 
@@ -30,15 +29,9 @@ firstTypeOfGrid = np.genfromtxt('data/sqare1cm.dat',
                                 delimiter=" ")
 
 secondTypeOfGrid = np.genfromtxt('data/sqare3cm.dat',
-                                 dtype=None,
-                                 usecols=None,
-                                 delimiter=" ")
-
-# Printing information about objects/files
-print(mapOfZilina)
-# print('\n', inhabitants)
-# print('\n', allPixelsOfColour)
-# print(firstTypeOfGrid)
+                                dtype=None,
+                                usecols=None,
+                                delimiter=" ")
 
 TotalIDsPixelCount = []  # total pixels of different colour ID on one big square
 totalSumOfInhabitantsInMap = 0
@@ -79,6 +72,8 @@ for h in range(secondTypeOfGrid.shape[0]):
 g = 0
 f = 0
 
+file = open("data/Square3cmHumans.dat", "w")
+
 for h in range(secondTypeOfGrid.shape[0]):  # each square
     IDsPixelCount = []  # each square pixels of different colour ID
 
@@ -112,9 +107,14 @@ for h in range(secondTypeOfGrid.shape[0]):  # each square
         f += 1
 
     sumOfInhabitantsInSquareMatrix[f][g] = sumOfInhabitantsInSquare
+    file.write(str(sumOfInhabitantsInSquareMatrix[f][g]))
+    file.write('\n')
+
     totalSumOfInhabitantsInMap += sumOfInhabitantsInSquare
 
     g += 1
+
+file.close()
 
 for i in range(colourRange):
     print(i + 2, " ", TotalIDsPixelCount[i])

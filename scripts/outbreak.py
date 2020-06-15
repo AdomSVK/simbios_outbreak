@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont, ImageDraw
 import numpy as np
+import pandas as pd
 import csv
 import json
 
@@ -547,6 +548,24 @@ class Map:
             print(square_id)
             print(len(self.squares))
             self.squares[square_id].stops.append(stop)
+
+    def load_humans_to_small_squares(self):
+        humansInSmallSquares = np.genfromtxt('data/Square1cmHumans.dat',
+                dtype=None,
+                usecols=None,
+                delimiter=" ")
+
+        for h in range(humansInSmallSquares.shape[0]):
+            self.squares[h].set_population(humansInSmallSquares[h])
+
+    def load_humans_to_big_squares(self):
+        humansInBigSquares = np.genfromtxt('data/Square3cmHumans.dat',
+                dtype=None,
+                usecols=None,
+                delimiter=" ")
+
+        for h in range(humansInBigSquares.shape[0]):
+            self.squares[h].set_population(humansInBigSquares[h])
 
     def create_OD_matrix_by_squares(self, detail_matrix_csv_file_name):
         list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
