@@ -1,4 +1,4 @@
-from outbreak import *
+from scripts.outbreak import *
 
 mapa = MapCityParts("data/zilina_map_city_parts.png")     # dimensions: 1820 x 1624
 mapa.divide_into_city_parts("data/zilina_city_parts.dat")

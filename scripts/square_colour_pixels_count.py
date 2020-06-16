@@ -97,7 +97,7 @@ for h in range(secondTypeOfGrid.shape[0]):  # each square
     for i in range(0, colourRange):
         if TotalIDsPixelCount[i] != 0:
             inhabitantsInSquare.append(IDsPixelCount[i] / TotalIDsPixelCount[i] * inhabitants[i])
-            sumOfInhabitantsInSquare += int(inhabitantsInSquare[i])
+            sumOfInhabitantsInSquare += inhabitantsInSquare[i]
         else:
             inhabitantsInSquare.append(0)
             sumOfInhabitantsInSquare += inhabitantsInSquare[i]

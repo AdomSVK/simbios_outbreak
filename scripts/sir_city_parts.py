@@ -1,7 +1,7 @@
 import sys, os, math, csv
 import matplotlib.pyplot as plt
 import numpy as np
-from outbreak import *
+from scripts.outbreak import *
 
 ##########################
 # 

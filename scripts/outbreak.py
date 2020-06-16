@@ -359,6 +359,12 @@ class Square:
         # checks if the square contains this stop
         return stop in self.stops
 
+    def has_any_stop(self):
+        if len(self.stops) == 0:
+            return 0
+        else:
+            return 1
+
     def print(self):
         print("Square ", self.ID, ":")
         print("\t upper left ", self.upper_left)
@@ -367,7 +373,7 @@ class Square:
         for stop in self.stops:
             print("\t \t", end=" ")
             stop.print()
-
+        print("\t humans: ", self.population)
 
 
 class Map:
@@ -405,6 +411,43 @@ class Map:
             line = ((x_start, y), (x_end, y))
             draw.line(line, fill="black")
         del draw
+
+    def draw_map_with_stops(self):
+        list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
+        draw = ImageDraw.Draw(self.image)
+
+        for stop in list_of_stops:
+            stop.label_to_map(draw)
+
+    def get_count_of_squares_without_stops(self):
+        count = 0
+        for sq in self.squares:
+            if sq.has_any_stop() == 0:
+                count += 1
+        return count
+
+    def get_count_of_squares_without_humans(self):
+        count = 0
+        for sq in self.squares:
+            if sq.get_population() == 0:
+                count += 1
+        return count
+
+    def get_count_of_squares_with_humans_without_stops(self):
+        count = 0
+        for sq in self.squares:
+            if sq.get_population() > 0:
+                if sq.has_any_stop() == 0:
+                    count += 1
+        return count
+
+    def get_count_of_squares_without_humans_with_stops(self):
+        count = 0
+        for sq in self.squares:
+            if sq.get_population() == 0:
+                if sq.has_any_stop() == 1:
+                    count += 1
+        return count
 
     #Using Trasparency
     def color_square_stategy_max_ill(self):
@@ -498,7 +541,7 @@ class Map:
                           + str(square.lower_right[0]) + " " + str(square.lower_right[1]))
         outfile.close()
 
-    def print_squares_with_stops(self):
+    def print_squares_with_stops_and_humans(self):
         for square in self.squares:
             square.print()
 
@@ -546,7 +589,7 @@ class Map:
             square_id = int(stop.getY() / self.square_size) * self.columns \
                          + int(stop.getX() / self.square_size)
             print(square_id)
-            print(len(self.squares))
+            # print(len(self.squares))
             self.squares[square_id].stops.append(stop)
 
     def load_humans_to_small_squares(self):
@@ -557,6 +600,9 @@ class Map:
 
         for h in range(humansInSmallSquares.shape[0]):
             self.squares[h].set_population(humansInSmallSquares[h])
+
+        print(len(humansInSmallSquares))
+        print(len(self.squares))
 
     def load_humans_to_big_squares(self):
         humansInBigSquares = np.genfromtxt('data/Square3cmHumans.dat',
@@ -588,7 +634,6 @@ class Map:
             i += 1
 
         # TODO remove squares that do not have any inhabitants
-
 
     def read_detail_matrix(self, detail_matrix_file_name):
         with open(detail_matrix_file_name, errors='ignore') as csv_file:
