@@ -201,7 +201,10 @@ class Stop:
         self.longit = float(longit)
         self.x = int(x)
         self.y = int(y)
-        
+
+    def get_name(self):
+        return self.name
+
     def label_to_map(self,draw):
         font = ImageFont.truetype("data/arial.ttf", 15)
         r = 3
@@ -324,14 +327,82 @@ class Square:
     # geometrically, this can also be a rectangle
 
     def __init__(self, ID, upper_left = (0,0), lower_right = (0,0)):
-        self.stops = []
-        # TODO divide population into SIRD groups
+
+        # Real data
+        self.ID = ID
         self.population = 0
-        self.beta = 0
+        self.stops = []
+
+        # Map attributes
         self.upper_left = upper_left
         self.lower_right = lower_right
-        self.ID = ID
-        self.illSymptoms = 0
+
+        # Model attributes
+        self.beta = 0
+
+        self.Sus = []
+        self.InfA = []
+        self.InfS = []
+        self.Rec = []
+        self.Hos = []
+        self.Dea = []
+
+    def add_Sus(self, count):
+        self.Sus.append(count)
+
+    def add_InfA(self, count):
+        self.InfA.append(count)
+
+    def add_InfS(self, count):
+        self.InfS.append(count)
+
+    def add_Rec(self, count):
+        self.Rec.append(count)
+
+    def add_Hos(self, count):
+        self.Hos.append(count)
+
+    def add_Dea(self, count):
+        self.Dea.append(count)
+
+    def get_at_Sus(self, position):
+        return self.Sus[position]
+
+    def get_at_InfA(self, position):
+        return self.InfA[position]
+
+    def get_at_InfS(self, position):
+        return self.InfS[position]
+
+    def get_at_Rec(self, position):
+        return self.Rec[position]
+
+    def get_at_Hos(self, position):
+        return self.Hos[position]
+
+    def get_at_Dea(self, position):
+        return self.Dea[position]
+
+    def get_Sus(self):
+        return self.Sus
+
+    def get_InfA(self):
+        return self.InfA
+
+    def get_InfS(self):
+        return self.InfS
+
+    def get_Rec(self):
+        return self.Rec
+
+    def get_Hos(self):
+        return self.Hos
+
+    def get_Dea(self):
+        return self.Dea
+
+    def get_ID(self):
+        return self.ID
 
     def get_illSymptoms(self):
         return self.illSymptoms
@@ -441,12 +512,105 @@ class Map:
                     count += 1
         return count
 
+    # Use this method before manipulation with squares -> removing squares without population, etc.
+    # Big squares only -> 85pix
+    def give_population_to_nearest_squares_with_stop(self):
+        for x in range(0,len(self.squares)):
+            if self.squares[x].has_any_stop() == 0 and self.squares[x].get_population() > 0.0:
+                count = self.count_squares_with_stop_around_position(x,1)
+                #If it was unable to find in range 1 around the square square with stop it will try range 2
+                if(count >= 1):
+                    self.give_population_to_squares_with_stop_in_range(x,1,count)
+                else:
+                    count = self.count_squares_with_stop_around_position(x, 2)
+                    self.give_population_to_squares_with_stop_in_range(x, 2, count)
+
+    def give_population_to_squares_with_stop_in_range(self, position, rangee, number_of_stops_around):
+        start_check_pos = position - (22*rangee) - 1 - (rangee - 1) * 2
+        end_check_pos = start_check_pos + 3 + (2 ** (rangee - 1) - 1)
+        for i in range(start_check_pos, end_check_pos):
+            if (i > -1 and i < len(self.squares)):
+                if self.squares[i].has_any_stop() == 1:
+                    self.squares[i].set_population(self.squares[i].get_population() + (
+                                self.squares[position].get_population() / number_of_stops_around))
+
+        for i in range(0, rangee):
+            start_check_pos += 22
+            end_check_pos += 22
+            if (start_check_pos > -1 and start_check_pos < len(self.squares)):
+                if (self.squares[start_check_pos].has_any_stop() == 1):
+                    self.squares[start_check_pos].set_population(self.squares[start_check_pos].get_population() + (
+                            self.squares[position].get_population() / number_of_stops_around))
+
+            if (end_check_pos > -1 and end_check_pos < len(self.squares)):
+                if (self.squares[end_check_pos].has_any_stop() == 1):
+                    self.squares[end_check_pos].set_population(self.squares[end_check_pos].get_population() + (
+                            self.squares[position].get_population() / number_of_stops_around))
+
+        start_check_pos += 22
+        end_check_pos += 22
+        for i in range(start_check_pos, start_check_pos + 3 + (2 ** (rangee - 1) - 1)):
+            if (i > -1 and i < len(self.squares)):
+                if self.squares[i].has_any_stop() == 1:
+                    self.squares[i].set_population(self.squares[i].get_population() + (
+                                self.squares[position].get_population() / number_of_stops_around))
+
+        self.squares[position].set_population(0)
+
+    #Big squares only -> 85pix
+    def count_squares_with_stop_around_position(self, position, rangee):
+        count = 0
+        start_check_pos = position - (22*rangee) - 1 - (rangee-1)*2
+        end_check_pos = start_check_pos + 3 + (2**(rangee-1)-1)
+        for i in range(start_check_pos, end_check_pos):
+            if(i > -1 and i < len(self.squares)):
+                if self.squares[i].has_any_stop() == 1:
+                    count += 1
+
+        for i in range(0,rangee):
+            start_check_pos += 22
+            end_check_pos += 22
+            if (start_check_pos > -1 and start_check_pos < len(self.squares)):
+                if(self.squares[start_check_pos].has_any_stop() == 1):
+                    count += 1
+
+            if (end_check_pos > -1 and end_check_pos < len(self.squares)):
+                if(self.squares[end_check_pos].has_any_stop() == 1):
+                    count += 1
+
+        start_check_pos += 22
+        end_check_pos += 22
+        for i in range(start_check_pos,start_check_pos+3+(2 ** (rangee-1)-1)):
+            if(i > -1 and i < len(self.squares)):
+                if self.squares[i].has_any_stop() == 1:
+                    count += 1
+
+        return count
+
+
+    def get_count_of_squares_with_humans_with_stops(self):
+        count = 0
+        for sq in self.squares:
+            if sq.get_population() > 0:
+                if sq.has_any_stop() == 1:
+                    count += 1
+        return count
+
     def get_count_of_squares_without_humans_with_stops(self):
         count = 0
         for sq in self.squares:
             if sq.get_population() == 0:
                 if sq.has_any_stop() == 1:
                     count += 1
+        return count
+
+    def print_names_of_stops_without_population(self):
+        count = 0
+        for sq in self.squares:
+            if sq.get_population() == 0:
+                if sq.has_any_stop() == 1:
+                    for stop in sq.stops:
+                        print(stop.get_name())
         return count
 
     #Using Trasparency
@@ -500,6 +664,17 @@ class Map:
         self.image = self.image.convert("RGB")
         del draw
 
+    def remove_squares_without_population(self):
+        remove = []
+        for sq in self.squares:
+            if sq.get_population() == 0.0:
+                remove.append(sq)
+        for sq in remove:
+            self.squares.remove(sq)
+
+    def save_map(self):
+        self.image.save("mapa.png")
+
     def show_map(self):
         self.image.show()
 
@@ -545,6 +720,14 @@ class Map:
         for square in self.squares:
             square.print()
 
+    def count_all_population(self):
+        count = 0
+
+        for x in self.squares:
+            count += x.get_population()
+
+        return count
+
     def load_stops(self, filename):
         f = open(filename, "r", errors='ignore')
         lines = []
@@ -588,7 +771,7 @@ class Map:
         for stop in list_of_stops:
             square_id = int(stop.getY() / self.square_size) * self.columns \
                          + int(stop.getX() / self.square_size)
-            print(square_id)
+            #print(square_id)
             # print(len(self.squares))
             self.squares[square_id].stops.append(stop)
 
@@ -673,6 +856,8 @@ class MapCityParts:
 
     def show_map(self):
         self.image.show()
+
+
 
     def load_stops(self, filename):
         f = open(filename, "r", errors='ignore')
