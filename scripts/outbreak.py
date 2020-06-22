@@ -360,6 +360,7 @@ class Square:
 
     def print(self):
         print("Square ", self.ID, ":")
+        print("Population in square :", self.get_population(self))
         print("\t upper left ", self.upper_left)
         print("\t lower right ", self.lower_right)
         print("\t stops: ")
@@ -489,6 +490,7 @@ class Map:
                       self.squares[self.columns * i + j].lower_right,
                       end = ", ")
             print(" ")
+            
 
     def print_squares_to_file(self, filename):
         outfile = open(filename, "w", errors='ignore')

@@ -155,7 +155,7 @@ while days < n_days:
 
 d = np.arange(0, n_days , 1)    
 ylim = 8000
-
+#-------------------------------------------------------------------grafy
 for i in range(0,2):
     for j in range(0,5):
         print(5 * i + j + 1)
