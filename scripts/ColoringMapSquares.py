@@ -1,4 +1,4 @@
-from outbreak import Map
+from scripts.outbreak import Map
 
 mapa = Map("data/zilina_map_districts.png")
 #mapa.draw_grid(250)
