@@ -323,7 +323,7 @@ class Municipality:
 
 
 
-class Square:
+class Square:     #EXTRA TODO
     # geometrically, this can also be a rectangle
 
     def __init__(self, ID, upper_left = (0,0), lower_right = (0,0)):
@@ -338,7 +338,19 @@ class Square:
         self.lower_right = lower_right
 
         # Model attributes
-        self.beta = 0
+        self.pismenobeta = 1.375
+        self.alpha = 4.0
+        # Set/Get other atributes ?
+        self.coef_p = 1. / 16.
+        self.coef_r = 0.195
+        self.coef_d = 0.07
+        self.gamma = 1. / 14.
+        self.gamma_a = self.gamma
+        self.gamma_s = self.gamma
+        self.gamma_h = self.gamma
+
+        self.i_position = 0
+        self.j_position = 0
 
         self.Sus = []
         self.InfA = []
@@ -346,12 +358,42 @@ class Square:
         self.Rec = []
         self.Hos = []
         self.Dea = []
+        self.Summary = []
+
+        #self.inicialize()#fix double inicialize 1.S
+
+    def inicialize(self):
+        self.Sus.append(self.population)
+        self.InfA.append(0.0)
+        self.InfS.append(0.0)
+        self.Rec.append(0.0)
+        self.Hos.append(0.0)
+        self.Dea.append(0.0)
+        self.Summary.append(
+            self.Sus[len(self.Sus) - 1] + self.InfA[len(self.InfA) - 1] + self.InfS[len(self.InfS) - 1] + self.Rec[
+                len(self.Rec) - 1] + self.Hos[len(self.Hos) - 1] + self.Dea[len(self.Dea) - 1])
+
+    def set_i(self, i):
+        self.i_position = i
+
+    def set_j(self, j):
+        self.j_position = j
+
+    def get_i(self):
+        return self.i_position
+
+    def get_j(self):
+        return self.j_position
 
     def add_Sus(self, count):
         self.Sus.append(count)
 
     def add_InfA(self, count):
         self.InfA.append(count)
+
+    def change_InfA(self,cislo):
+        self.InfA[0] = cislo
+        self.Sus[0] = self.population - cislo
 
     def add_InfS(self, count):
         self.InfS.append(count)
@@ -405,7 +447,7 @@ class Square:
         return self.ID
 
     def get_illSymptoms(self):
-        return self.illSymptoms
+        return self.InfS[len(self.InfS)-1]
 
     def set_population(self, population):
         self.population = population
@@ -415,6 +457,9 @@ class Square:
 
     def get_ID(self):
         return self.ID
+
+    def get_beta(self):
+        return self.pismenobeta
 
     def set_parameter_beta(self, beta):
         self.beta = beta
@@ -438,7 +483,14 @@ class Square:
 
     def print(self):
         print("Square ", self.ID, ":")
-        print("Population in square :", self.get_population(self))
+        print("Population in square :", self.get_population())
+        print("Suspectible in 150 days: ",self.Sus)
+        print("Infected asymptomatic in 150 days: ",self.InfA)
+        print("Infected symptomatic in 150 days: ",self.InfS)
+        print("Recovered in 150 days :",self.Rec)
+        print("Hospitalized in 150 days: ",self.Hos)
+        print("Dead in 150 days: ",self.Dea)
+        print("Summary in 150 days: ", self.Summary)
         print("\t upper left ", self.upper_left)
         print("\t lower right ", self.lower_right)
         print("\t stops: ")
@@ -447,8 +499,66 @@ class Square:
             stop.print()
         print("\t humans: ", self.population)
 
+    def selfplot(self):
+        plt.plot(self.Sus, label="  sus")
+        plt.plot(self.InfS, label="  infS")
+        plt.plot(self.Rec, label="  rec")
 
-class Map:
+        plt.legend(loc="upper right")
+        #plt.savefig("zilina.png")
+        #lt.show()
+
+    #Prirobit a prisposobit funkciu update zo skriptu city_parts.py, stvorec si sam pamata-ma samotne informacie o stave, netreba robit kompletne pole pre vsetky stvorce
+    #inicialiya4n0 hodnoty pre jednotlive stavy, funkcia update sa bude volať pri posunutí sa o deň viac
+    def update(self, position, matrix, squares):
+        frac_top = 0.0
+        frac_bot = 0.0
+        for k in range(0, len(squares)):
+            frac_top += matrix[k][position] * squares[k].get_InfA()[len(squares[k].get_InfA())-1]\
+                       * self.pismenobeta \
+                        / (squares[k].get_at_Sus(len(squares[k].get_Sus())-1) +
+                           squares[k].get_at_InfA(len(squares[k].get_InfA())-1) +
+                           squares[k].get_at_Sus(len(squares[k].get_Sus())-1))
+            frac_bot += matrix[k][position]  # matrix is transposed, as opposed to the article about Yerevan
+        frac_top *= self.alpha * self.Sus[len(self.Sus)-1]
+        frac_bot += self.Sus[len(self.Sus)-1] + self.InfA[len(self.InfA)-1] + self.Rec[len(self.Rec)-1]
+        Bf_tmp = frac_top / frac_bot
+
+        self.Sus.append(
+            self.Sus[len(self.Sus) - 1] - self.pismenobeta * self.Sus[len(self.Sus) - 1] * self.InfA[len(self.InfA) - 1] /
+            (self.Sus[len(self.Sus) - 1] + self.InfA[len(self.InfA) - 1] + self.Rec[len(self.Rec) - 1]) - Bf_tmp)#
+
+        self.InfA.append(
+            self.InfA[len(self.InfA) - 1] + self.pismenobeta * self.Sus[len(self.Sus) - 1] * (1 - self.coef_p) * self.InfA[
+                len(self.InfA) - 1] /
+            (self.Sus[len(self.Sus) - 1] + self.InfA[len(self.InfA) - 1] + self.Rec[len(self.Rec) - 1]) - self.gamma_a *
+            self.InfA[len(self.InfA) - 1] + (1 - self.coef_p) * Bf_tmp )#
+
+        self.InfS.append(
+            self.InfS[len(self.InfS) - 1] + self.pismenobeta * self.Sus[len(self.Sus) - 1] * self.coef_p * (1 - self.coef_r) *
+            self.InfA[len(self.InfA) - 1] /
+            (self.Sus[len(self.Sus) - 1] + self.InfA[len(self.InfA) - 1] + self.Rec[len(self.Rec) - 1]) - self.gamma_s *
+            self.InfS[len(self.InfS) - 1] + self.coef_p * (1 - self.coef_r) * Bf_tmp)#
+
+        self.Hos.append(
+            self.Hos[len(self.Hos) - 1] + self.pismenobeta * self.Sus[len(self.Sus) - 1] * self.coef_p * self.coef_r *
+            self.InfA[len(self.InfA) - 1] /
+            (self.Sus[len(self.Sus) - 1] + self.InfA[len(self.InfA) - 1] + self.Rec[len(self.Rec) - 1]) - self.gamma_h *
+            self.Hos[len(self.Hos) - 1] + self.coef_p * self.coef_r * Bf_tmp)#
+
+        self.Rec.append(
+            self.Rec[len(self.Rec) - 1] + self.gamma_a * self.InfA[len(self.InfA) - 1] + self.gamma_s * self.InfS[
+                len(self.InfS) - 1] +
+            self.gamma_h * (1 - self.coef_d) * self.Hos[len(self.Hos) - 1])
+
+        self.Dea.append(
+            self.Dea[len(self.Dea) - 1] + self.gamma_h * self.coef_d * self.Hos[len(self.Hos) - 1])
+        #skontrolovat spravnost vzorcov(kontrolne sucty vo stvorcoch)
+        self.Summary.append(
+            self.Sus[len(self.Sus) - 1] + self.InfA[len(self.InfA) - 1] + self.InfS[len(self.InfS) - 1] + self.Rec[
+                len(self.Rec) - 1] + self.Hos[len(self.Hos) - 1] + self.Dea[len(self.Dea) - 1])
+
+class Map:       #EXTRA TODO
     # [0,0] is in upper left corner
 
     def __init__(self, image_file):
@@ -462,7 +572,12 @@ class Map:
         self.square_size = 0
         self.rows = 0
         self.columns = 0
+        self.img_temp = self.image
         self.OD = []   # origin-destination matrix
+        self.OD_workday = []
+
+    def reset_map(self):
+        self.image = self.img_temp
 
     def draw_grid(self, pixel_step):
         # Draw some lines
@@ -645,8 +760,8 @@ class Map:
         del draw
 
     #Using Transparency
-    def color_square_strategy_square_max_population(self):
-
+    def color_square_strategy_square_max_population(self): #volba no.1
+        self.reset_map()
         if len(self.squares) == 0:
             raise Exception("Missing squares!")
 
@@ -673,8 +788,9 @@ class Map:
         for sq in remove:
             self.squares.remove(sq)
 
-    def save_map(self):
-        self.image.save("mapa.png")
+    def save_map(self,name):
+        mapname = "mapa_" + str(name) + ".png"
+        self.image.save(mapname)
 
     def show_map(self):
         self.image.show()
@@ -719,8 +835,11 @@ class Map:
         outfile.close()
 
     def print_squares_with_stops_and_humans(self):
+        counter = 0
         for square in self.squares:
+            counter = counter + 1
             square.print()
+        print(counter)
 
     def count_all_population(self):
         count = 0
@@ -801,10 +920,8 @@ class Map:
     def create_OD_matrix_by_squares(self, detail_matrix_csv_file_name):
         list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
         OD_detailed = self.read_detail_matrix(detail_matrix_csv_file_name)
-
         # initialisation of coarse OD matrix
-        self.OD = [[0 for i in range(len(self.squares))] for j in range(len(self.squares))]
-
+        self.OD = [[0 for i in range(len(self.squares))] for j in range(len(self.squares))] #440x440 matrix
         i = 0
         for stop_from in list_of_stops:
             square_from = int(stop_from.getY() / self.square_size) * self.columns \
@@ -818,7 +935,104 @@ class Map:
                 j += 1
             i += 1
 
-        # TODO remove squares that do not have any inhabitants
+    def create_OD_workday_matrix_by_squares(self, detail_matrix_csv_file_name):
+        list_of_stops = self.load_stops("data/zilina_id_stops_coords.txt")
+        OD_detailed = self.read_detail_matrix(detail_matrix_csv_file_name)
+        # initialisation of coarse OD matrix
+        self.OD_workday = [[0 for i in range(len(self.squares))] for j in range(len(self.squares))] #440x440 matrix
+        i = 0
+        for stop_from in list_of_stops:
+            square_from = int(stop_from.getY() / self.square_size) * self.columns \
+                         + int(stop_from.getX() / self.square_size)
+            j = 0
+            for stop_to in list_of_stops:
+                if int(OD_detailed[i][j]) != 0:
+                    square_to = int(stop_to.getY() / self.square_size) * self.columns \
+                         + int(stop_to.getX() / self.square_size)
+                    self.OD_workday[square_from][square_to] += int(OD_detailed[i][j])
+                j += 1
+            i += 1
+
+    # Before square manipulation Adamove mazanie matice
+    def fixOD(self):
+        nemaz = []
+        vymaz = []
+        for x in range(0, len(self.squares)):
+            vymaz.append(x)
+            if (self.squares[x].has_any_stop() == 1):
+                nemaz.append(x)
+
+        x = len(nemaz) - 1
+
+        while (x >= 0):
+            vymaz.remove(vymaz[nemaz[x]])
+            x = x - 1
+
+        x = len(vymaz) - 1
+        while (x >= 0):
+            novaOD = []
+
+            for i in range(0, len(self.OD)):
+                if i != vymaz[x]:
+                    riadok = []
+                    for j in range(0, len(self.OD)):
+                        if j != vymaz[x]:
+                           riadok.append(self.OD[i][j])
+                    novaOD.append(riadok)
+
+            self.OD = novaOD
+            x = x - 1
+
+    def fixOD_workday(self):
+        nemaz = []
+        vymaz = []
+        for x in range(0, len(self.squares)):
+            vymaz.append(x)
+            if (self.squares[x].has_any_stop() == 1):
+                nemaz.append(x)
+
+        x = len(nemaz) - 1
+
+        while (x >= 0):
+            vymaz.remove(vymaz[nemaz[x]])
+            x = x - 1
+
+        x = len(vymaz) - 1
+        while (x >= 0):
+            novaOD = []
+
+            for i in range(0, len(self.OD_workday)):
+                if i != vymaz[x]:
+                    riadok = []
+                    for j in range(0, len(self.OD_workday)):
+                        if j != vymaz[x]:
+                           riadok.append(self.OD_workday[i][j])
+                    novaOD.append(riadok)
+
+            self.OD_workday = novaOD
+            x = x - 1
+
+    def print_OD_matrix_by_squares_Adam(self):     #Adamova uprava printu
+        total_number_of_trips = 0
+        for i in range(len(self.OD)):
+            #print(i, end=" ")
+            for j in range(len(self.OD)):
+                #print(self.OD[i][j], end=" ")
+                print('{:^3}'.format(self.OD[i][j]), end=" ")
+            total_number_of_trips += self.OD[i][j]
+            print(" ")
+        print("total number of trips: ", total_number_of_trips)
+
+    def print_OD_workday_matrix_by_squares_Adam(self):     #Adamova uprava printu
+        total_number_of_trips = 0
+        for i in range(len(self.OD_workday)):
+            #print(i, end=" ")
+            for j in range(len(self.OD_workday)):
+                #print(self.OD[i][j], end=" ")
+                print('{:^3}'.format(self.OD_workday[i][j]), end=" ")
+            total_number_of_trips += self.OD_workday[i][j]
+            print(" ")
+        print("total number of trips: ", total_number_of_trips)
 
     def read_detail_matrix(self, detail_matrix_file_name):
         with open(detail_matrix_file_name, errors='ignore') as csv_file:
@@ -836,13 +1050,183 @@ class Map:
 
     def print_OD_matrix_by_squares(self):
         total_number_of_trips = 0
-        for i in range(len(self.squares)):
-            for j in range(len(self.squares)):
-                print(self.OD[i][j], end=" ")
+        #print("x", end=" ")
+        for i in range(len(self.OD)): #self.squares
+            print(i, end= " ")
+            for j in range(len(self.OD)): #self.squares
+                print(j, end=" ")
+                #if(self.OD[i][j]==0):
+                    #print(" ", end=" ")
+                    #continue
+                #else:
+                print('{:^3}'.format(self.OD[i][j]), end= " ")   #self.OD[i][j], end=" "
                 total_number_of_trips += self.OD[i][j]
             print(" ")
         print("total number of trips: ", total_number_of_trips)
-        
+        #print(self.OD[3])
+        #for i in range(len(self.OD)):
+            #print(self.OD[i][10])
+    def detect_zeros_collumns_and_rows(self):
+        checker_collumns = 0
+        checker_rows = 0
+
+        i = 0
+        j = 0
+        z = 0
+        border = 440
+
+        while i != border+1 and j != border + 1:
+            for x in range(i,border):
+                if self.OD[i][x] != 0:
+                    checker_collumns = 1
+                    break
+
+
+            for y in range(j,border):
+                if self.OD[y][j] != 0:
+                    checker_rows = 1
+                    break
+
+            if checker_collumns == 1 and checker_rows == 1:
+                checker_collumns = 0
+                checker_rows = 0
+                z = z + 1
+                print("i:",i,"j:",j, "\n")
+
+            i = i + 1
+            j = j + 1
+        print("count:",z)
+
+    def whole_detection(self):
+        checker_collumns = 0
+        checker_rows = 0
+        counter = 0
+
+        i = 0
+        j = 0
+        z = 0
+        while counter < len(self.OD):
+            for x in range(len(self.OD)):
+                if self.OD[i][x] != 0:
+                    checker_collumns = 1
+                    break
+
+            for y in range(len(self.OD)):
+                if self.OD[y][j] != 0:
+                    checker_rows = 1
+                    break
+
+            if checker_collumns == 1 or checker_rows == 1:
+                checker_collumns = 0
+                checker_rows = 0
+                z = z + 1
+                print("i:", i, "j:", j)
+            counter = counter + 1
+
+            i = i + 1
+            #print("i:",i)
+            j = j + 1
+            #print("j:",j)
+
+        print("count:", z)
+
+    def pomocna(self):
+        print("row:")
+        for i in range(len(self.OD)):
+            print(self.OD[17][i])
+
+        print("column:")
+        for i in range(len(self.OD)):
+            print(self.OD[i][17])
+        print(self.OD[17][17])
+
+    def remove_zeros_from_OD(self):
+        checker_collumns = 0
+        checker_rows = 0
+        condition = 0
+        counter = 0
+        p = 0
+
+        i = 0
+        j = 0
+
+        while counter < len(self.OD):
+            for x in range(0, len(self.OD)):
+                if self.OD[i][x] != 0:
+                    checker_collumns = 1
+                    break
+
+            for y in range(0, len(self.OD)):
+                if self.OD[y][j] != 0:
+                    checker_rows = 1
+                    break
+
+            for x in range(len(self.squares)):
+                c1 = self.squares[x].ID
+                pom1 = int(c1 / 22)
+                pom2 = int(c1 % 22)
+                if (i+p) == pom1 and (j+p) == pom2:
+                    condition = 1
+                    break
+
+            if checker_collumns == 0 and checker_rows == 0 and condition == 0:
+                self.OD = np.delete(self.OD, i, 0)
+                self.OD = np.delete(self.OD, j, 1)
+                p = p + 1
+                i = 0
+                j = 0
+                counter = 0
+            else:
+                checker_collumns = 0
+                checker_rows = 0
+                condition = 0
+                counter = counter + 1
+                i = i + 1
+                j = j + 1
+
+    def remove_zeros(self):
+        checker_collumns = 0
+        checker_rows = 0
+        counter = 0
+
+        i = 0
+        j = 0
+
+        a = np.array([[0, 1, 0, 3],
+                         [4, 5, 0, 7],
+                         [0, 0, 0, 0],
+                         [12, 13, 0, 15]])
+        print(a)
+        while counter < len(a):
+            for x in range(0,len(a)):
+                if a[i][x] != 0:
+                    checker_collumns = 1
+                    break
+
+            for y in range(0,len(a)):
+                if  a[y][j] != 0:
+                    checker_rows = 1
+                    break
+
+            if checker_collumns == 0 and checker_rows == 0:
+                a= np.delete(a,i,0)
+                a = np.delete(a,j,1)
+                i = 0
+                j = 0
+                counter = 0
+            else:
+                checker_collumns = 0
+                checker_rows = 0
+                counter = counter + 1
+                i = i + 1
+                j = j + 1
+        print(a)
+
+
+
+
+
+
 class MapCityParts:
     # [0,0] is in upper left corner
 
