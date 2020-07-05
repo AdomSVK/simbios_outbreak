@@ -89,6 +89,7 @@ def update():
     Rec_tmp = np.zeros((n_loc,1))
     InfS_tmp = np.zeros((n_loc,1))
     InfA_tmp = np.zeros((n_loc,1))
+
     for j in range(0,n_loc):
         frac_top = 0.0
         frac_bot = 0.0
@@ -99,12 +100,12 @@ def update():
         frac_bot += Sus[j] + InfA[j] + Rec[j]
         Bf_tmp[j] = frac_top/frac_bot
 
-        Sus_tmp[j] = Sus[j] - Beta[j]*Sus[j]*InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - Bf_tmp[j] 
-        InfA_tmp[j] = InfA[j] + Beta[j]*Sus[j]*(1 - coef_p)*InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - gamma_a*InfA[j] + (1 - coef_p)*Bf_tmp[j]         
-        InfS_tmp[j] = InfS[j] + Beta[j]*Sus[j]*coef_p*(1 - coef_r)*InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - gamma_s*InfS[j] + coef_p*(1 - coef_r)*Bf_tmp[j]         
-        Hos_tmp[j] = Hos[j] + Beta[j]*Sus[j]*coef_p*coef_r*InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - gamma_h*Hos[j] + coef_p*coef_r*Bf_tmp[j]         
-        Rec_tmp[j] = Rec[j] + gamma_a*InfA[j] + gamma_s*InfS[j] + gamma_h*(1 - coef_d)*Hos[j]
-        Dea_tmp[j] = Dea[j] + gamma_h*coef_d*Hos[j]
+        Sus_tmp[j] = Sus[j] - Beta[j] * Sus[j]*InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - Bf_tmp[j]
+        InfA_tmp[j] = InfA[j] + Beta[j] * Sus[j] * (1 - coef_p) * InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - gamma_a*InfA[j] + (1 - coef_p)*Bf_tmp[j]
+        InfS_tmp[j] = InfS[j] + Beta[j] * Sus[j] * coef_p * (1 - coef_r) * InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - gamma_s * InfS[j] + coef_p * (1 - coef_r) * Bf_tmp[j]
+        Hos_tmp[j] = Hos[j] + Beta[j] * Sus[j] * coef_p * coef_r * InfA[j]/(Sus[j] + InfA[j] + Rec[j]) - gamma_h*Hos[j] + coef_p * coef_r * Bf_tmp[j]
+        Rec_tmp[j] = Rec[j] + gamma_a * InfA[j] + gamma_s*InfS[j] + gamma_h*(1 - coef_d) * Hos[j]
+        Dea_tmp[j] = Dea[j] + gamma_h * coef_d * Hos[j]
 
     for j in range(0,n_loc):
         Sus[j] = Sus_tmp[j]
