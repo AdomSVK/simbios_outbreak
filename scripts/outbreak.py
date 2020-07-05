@@ -518,7 +518,7 @@ class Square:     #EXTRA TODO
                        * self.pismenobeta \
                         / (squares[k].get_at_Sus(len(squares[k].get_Sus())-1) +
                            squares[k].get_at_InfA(len(squares[k].get_InfA())-1) +
-                           squares[k].get_at_Sus(len(squares[k].get_Sus())-1))
+                           squares[k].get_at_Rec(len(squares[k].get_Rec())-1))
             frac_bot += matrix[k][position]  # matrix is transposed, as opposed to the article about Yerevan
         frac_top *= self.alpha * self.Sus[len(self.Sus)-1]
         frac_bot += self.Sus[len(self.Sus)-1] + self.InfA[len(self.InfA)-1] + self.Rec[len(self.Rec)-1]
